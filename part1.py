@@ -49,14 +49,17 @@ def extract_info(filename):
 transactions, initials = extract_info(sys.argv[1])
 print(initials)
 print(transactions)
-x = int(sys.argv[2])
-print(x)
+step = int(sys.argv[2])
+print(step)
 print("\n")
 #####
 
 disk = initials
 membuf = dict()
 localmem = dict()
+
+iterators = [-1 for _ in range(0, len(transactions))]
+curpos = -1
 
 def run_input(var):
 	global disk, membuf
@@ -95,57 +98,106 @@ def run_output(var):
 	disk[var] = membuf[var]
 
 
-read = re.compile("READ\((.*)\)")
-write = re.compile("WRITE\((.*)\)")
-inp = re.compile("INPUT\((.*)\)")
-out = re.compile("OUTPUT\((.*)\)")
-oper = re.compile("(.*):=(.*)")
+# read = re.compile("READ\((.*)\)")
+# write = re.compile("WRITE\((.*)\)")
+# inp = re.compile("INPUT\((.*)\)")
+# out = re.compile("OUTPUT\((.*)\)")
+# oper = re.compile("(.*):=(.*)")
 
-for ts in transactions["T1"]:
-	# print(ts)
-	if "READ" in ts:
-		print("READ",ts)
-		try:
-			readvars = read.match(ts).groups()[0].strip().split(",")
-			print(readvars)
-		except:
-			print("Error: Processing ", ts)
-			exit()
-	elif "WRITE" in ts:
-		print("WRITE",ts)
-		try:
-			writevars = write.match(ts).groups()[0].strip().split(",")
-			print(writevars)
-		except:
-			print("Error: Processing ", ts)
-			exit()		
-	elif "INPUT" in ts:
-		print("INPUT",ts)
-		try:
-			invars = inp.match(ts).groups()[0].strip()
-			print(invars)
-		except:
-			print("Error: Processing ", ts)
-			exit()		
-	elif "OUTPUT" in ts:
-		print("OUTPUT",ts)
-		try:
-			outvars = out.match(ts).groups()[0].strip()
-			print(outvars)
-		except:
-			print("Error: Processing ", ts)
-			exit()				
-	elif ":=" in ts:
-		print("OP",ts)	
-		try:
-			opvars = list(map(str.strip, oper.match(ts).groups()))
-			print(opvars)
-			assert(len(opvars) is 2)
-		except:
-			print("Error: Processing ", ts)
-			exit()				
+# for ts in transactions["T1"]:
+# 	# print(ts)
+# 	if "READ" in ts:
+# 		print("READ",ts)
+# 		try:
+# 			readvars = read.match(ts).groups()[0].strip().split(",")
+# 			print(readvars)
+# 		except:
+# 			print("Error: Processing ", ts)
+# 			exit()
+# 	elif "WRITE" in ts:
+# 		print("WRITE",ts)
+# 		try:
+# 			writevars = write.match(ts).groups()[0].strip().split(",")
+# 			print(writevars)
+# 		except:
+# 			print("Error: Processing ", ts)
+# 			exit()		
+# 	elif "INPUT" in ts:
+# 		print("INPUT",ts)
+# 		try:
+# 			invars = inp.match(ts).groups()[0].strip()
+# 			print(invars)
+# 		except:
+# 			print("Error: Processing ", ts)
+# 			exit()		
+# 	elif "OUTPUT" in ts:
+# 		print("OUTPUT",ts)
+# 		try:
+# 			outvars = out.match(ts).groups()[0].strip()
+# 			print(outvars)
+# 		except:
+# 			print("Error: Processing ", ts)
+# 			exit()				
+# 	elif ":=" in ts:
+# 		print("OP",ts)	
+# 		try:
+# 			opvars = list(map(str.strip, oper.match(ts).groups()))
+# 			print(opvars)
+# 			assert(len(opvars) is 2)
+# 		except:
+# 			print("Error: Processing ", ts)
+# 			exit()				
+# 	else:
+# 		print("Error: Processing ", ts)
+# 		exit()
+
+def getnext_pos():
+	global transactions, iterators, curpos
+	curpos = (curpos + 1) % len(iterators)
+	if iterators[curpos] == "done":
+		return getnext_pos()
 	else:
-		print("Error: Processing ", ts)
-		exit()
+		return curpos
+
+def get_ts_curpos():
+	global transactions, iterators, curpos, step
+	begin = iterators[curpos]
+	if begin >= len(transactions[list(transactions.keys())[curpos]]):
+		iterators[curpos] =  "done"
+		return []
+	end = begin + step
+	try:
+		iterators[curpos] = end
+		if end == len(transactions[list(transactions.keys())[curpos]]):
+			iterators[curpos] =  "done"
+		return transactions[list(transactions.keys())[curpos]][begin:end]
+	except:
+		iterators[curpos] = "done"
+		return transactions[list(transactions.keys())[curpos]][begin:]
+
+def getnext_tset():
+	global transactions, iterators, curpos
+	if iterators.count("done") == len(iterators):
+		return []
+	else:
+		curpos = getnext_pos()
+		if iterators[curpos] == -1:
+			print("<START", list(transactions.keys())[curpos] , ">")
+			iterators[curpos] = 0
+		return get_ts_curpos()
+
+
+
+
+ts_set =  getnext_tset()
+while len(ts_set) is not 0:
+	print(ts_set)
+	ts_set = getnext_tset()
+
+
+
+
+
+
 
 
