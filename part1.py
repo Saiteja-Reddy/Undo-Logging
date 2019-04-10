@@ -155,6 +155,7 @@ def execute_transaction(tsname, ts):
 		try:
 			readvars = read.match(ts).groups()[0].strip().split(",")
 			# print(tsname,readvars)
+			readvars = list(map(str.strip, readvars))
 			run_read(readvars[0], readvars[1])
 		except:
 			print("Error: Processing ", ts)
@@ -164,6 +165,7 @@ def execute_transaction(tsname, ts):
 		try:
 			writevars = write.match(ts).groups()[0].strip().split(",")
 			# print(tsname,writevars)
+			writevars = list(map(str.strip, writevars))
 			run_write(tsname, writevars[0], writevars[1])
 		except:
 			print("Error: Processing ", ts)
@@ -172,6 +174,7 @@ def execute_transaction(tsname, ts):
 		# print("INPUT",ts)
 		try:
 			invars = inp.match(ts).groups()[0].strip()
+			invars = list(map(str.strip, invars))
 			# print(tsname,invars)
 		except:
 			print("Error: Processing ", ts)
@@ -180,6 +183,7 @@ def execute_transaction(tsname, ts):
 		# print("OUTPUT",ts)
 		try:
 			outvars = out.match(ts).groups()[0].strip()
+			outvars = str.strip(outvars)
 			# print(tsname,outvars)
 			run_output(outvars)
 		except:
@@ -194,7 +198,7 @@ def execute_transaction(tsname, ts):
 			expression_vars = get_variables(opvars[1])
 			# print(expression_vars)
 			safe_dict = make_safe_dict(expression_vars)
-			# print(safe_dict)
+			# print("dict" ,safe_dict)
 			try:
 				localmem[opvars[0]] = eval(opvars[1], {"__builtins__":None}, safe_dict) 
 				# print(localmem)
@@ -259,6 +263,7 @@ while len(ts_set) is not 0 and flag:
 	# flag-=1
 	tsname = list(transactions.keys())[curpos]
 	for ts in ts_set:
+		# print(ts)
 		execute_transaction(tsname, ts)
 	if to_commit_current == 1:
 		print("<COMMIT ", tsname, ">", sep="")
